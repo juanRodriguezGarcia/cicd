@@ -28,10 +28,10 @@ pipeline {
                 script {			
                     def rama;
                     sh "git branch -a > ramas.txt"
-                    sh "sed 's/remotes\\/origin\\///' ramas.txt"
-                    sh "cat ramas.txt"
+                    sh "sed 's/remotes\\/origin\\///' ramas.txt > rama.txt"
+                    sh "cat rama.txt"
                     ///Listar ramas
-                    def contenido = sh(script: "cat ramas.txt",returnStdout:true).trim()
+                    def contenido = sh(script: "cat rama.txt",returnStdout:true).trim()
                     echo contenido;
                     def values = contenido.split('\n')
                     ramasName=[]
