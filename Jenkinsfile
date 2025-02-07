@@ -42,14 +42,16 @@ pipeline {
                     }
 
 
-                    def RamaDeploy = input (message: 'Selecciona,',
-                    parameter:[
-                        [$class:'ChoiceParameterDefinition',
-                        choices: ramasName.join('\n'),
-                        name: 'Selecciona rama',
-                        description: 'desc'
-                        ]
-                    ])
+                def RamaDeploy = input(
+    message: 'Selecciona:',
+    parameters: [
+        [$class: 'ChoiceParameterDefinition',
+            choices: ramasName.join('\n'),
+            name: 'Selecciona rama',
+            description: 'desc'
+        ]
+    ]
+)
                     echo "Rama : $RamaDeploy"
                     Branch=RamaDeploy;
                     git branch: "${Branch}", credentialsId:'sonarid', url: 'https://github.com/juanRodriguezGarcia/cicd.git'
