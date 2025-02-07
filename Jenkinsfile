@@ -1,105 +1,62 @@
-node('linux'){
+import groovy.json.JsonSlurperClassic
 
-enviroment{
-	AWS_REGION='us-east-1'
+def jsonParse(def json) {
+    new groovy.json.JsonSlurperClassic().parseText(json)
+}
+pipeline {
+  agent any 
+  environment {
+    AWS_REGION='us-east-1'
 	AWS_DEFAULT_REGION='us-east-1'
-}
+  }
+  stages {
 
-stage('checkout'){
-	echo "### antesd del cabmio de rama"
-	sh "pwd"
-	sh "ls -ltr"
-	sh "git branch -a"
-}
+    stage("paso 1"){
+            steps {
+                script {			
+                sh "echo 'hola mundo desde GIT'"
+                    echo "### antesd del cabmio de rama"
+                    sh "pwd"
+                    sh "ls -ltr"
+                    sh "git branch -a"
+                }
+            }
+    }
 
-//Capaturar el ultimo comit
-//sh "git rev-parse HEAD > commit"
-//def commit = readFile('commit').trim()
-//echo ${commit}
+    stage("seleccionar rama"){
+            steps {
+                script {			
+                    def rama;
+                    sh "git branch -a > ramas.txt"
+                    sh "sed 's/remotes\\/origin\\///' ramas.txt"
+                    sh "cat ramas.txt"
+                    ///Listar ramas
+                    def contenido = sh(script: "cat ramas.txt",returnStdout:true).trim()
+                    echo contenido;
+                    def values = contenido.split('\n')
+                    ranasName=[]
+                    for (String exp:values){
+                        if(!exp.contains("master") &&  !exp.contains("HEAD")){
+                            ramasName.add(exp);
+                        }
+                    }
+                }
+            }
+    }
 
+  }
+  post {
+      always {          
+          deleteDir()
+           sh "echo 'ESTA FASE SIEMPRE SE EJECUTA SIN IMPORTAR SI FUE FALLIDO O NO'"
+      }
+      success {
+            sh "echo 'ESTA FASE SE EJECUTA SOLAMENTE SI FUE EXITOSO'"
+        }
 
-
-//echo "rama:  $scm.branches"
-//def branch_name= scm.branches[0].name
-//if(branch_name.contains("*/")){
-//branch_name=branch_name.split("\\*/")[1]
-//}
-//echo "$branch_name"
-
-
-stage("Deploy rama"){
-	def rama;
-	sh "git branch -a > ramas.txt"
-	sh "sed 's/remotes\\/origin\\///' ramas.txt"
-	sh "cat ramas.txt"
-	///Listar ramas
-	def contenido = sh(script: "cat ramas.txt",returnStdout:true).trim()
-    echo contenido;
-	def values = contenido.split('\n')
-	ranasName=[]
-	for (String exp:values){
-		if(!exp.contains("master") &&  !exp.contains("HEAD")){
-			ramasName.add(exp);
-		}
-	}
-	
-	// def RamaDeploy = input (message: 'Selecciona,',
-	// parameter:[
-	// 	[$class:'ChoiseParameterDefinition',
-	// 	choices: ramasName.join('\n'),
-	// 	name: 'Selecciona rama',
-	// 	description: 'desc'
-	// 	]
-	// ])
-	// echo "Rama : $RamaDeploy"
-	// Branch=RamaDeploy;
-	// git branch: "${Branch}", credentialsId:'Git-credential', url: 'https://github.com/juanRodriguezGarcia/cicd.git'
-	// echo "Despues del cambio"
-	// sh "git branch -a"
-	
-	// //Lectura del jenkins de la rama seleccionada
-	// script{
-	// 	load 'Jenkinsfile2'
-	// }
-	
-	
-	// //Generar tag
-	// withCredentials([[$class: 'UsernamePasswordMultiBinding',credentialsId:'git-hut-creden',usernameVariable:'GITHUB_APP',
-	// passeowdVariable:'GITHUB_ACESS_TOKEN']]){
-	// 	gitTagPush(version:'version1',
-	// 	message:'descripcion',
-	// 	username: env.GITHUB_APP,
-	// 	password:env.GITHUB_ACESS_TOKEN,
-	// 	email:"juang.rodriguez10@gmail.com")
-	// }
-	
-	
-
-}
-
-
-
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+      failure {
+            sh "echo 'ESTA FASE SE EJECUTA SI FUE FALLIDO'"
+      }
+      
+  }
+} 
