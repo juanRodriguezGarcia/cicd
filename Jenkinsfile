@@ -23,6 +23,23 @@ pipeline {
             }
     }
 
+    stage("Generar tag"){
+            steps {
+                script {			
+                    	//Generar tag
+                    withCredentials([[$class: 'UsernamePasswordMultiBinding',credentialsId:'sonarid',usernameVariable:'sonar',
+                    passwordVariable:'GITHUB_ACESS_TOKEN']]){
+                        gitTagPush(version:'version1',
+                        message:'descripcion',
+                        username: env.GITHUB_APP,
+                        password:env.GITHUB_ACESS_TOKEN,
+                        email:"juang.rodriguez10@gmail.com")
+                    }
+                    echo "### Se termina ejecucion rama seleccionada #####"                 
+                } //
+            }
+    }
+
     stage("seleccionar rama"){
             steps {
                 script {			
@@ -40,8 +57,6 @@ pipeline {
                             ramasName.add(exp);
                         }
                     }
-
-
                 def RamaDeploy = input(
                     message: 'Selecciona:',
                     parameters: [
@@ -65,6 +80,7 @@ pipeline {
                 } //
             }
     }
+
 
   }
   post {
