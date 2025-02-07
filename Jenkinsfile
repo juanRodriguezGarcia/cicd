@@ -1,5 +1,4 @@
-inode('linux'){
-
+node('linux'){
 
 enviroment{
 	AWS_REGION='us-east-1'
@@ -44,19 +43,19 @@ stage("Deploy rama"){
 		}
 	}
 	
-	def RamaDeploy = input (message: 'Selecciona,',
-	parameter:[
-		[$class:'ChoiseParameterDefinition',
-		choices: ramasName.join('\n'),
-		name: 'Selecciona rama',
-		description: 'desc'
-		]
-	])
-	echo "Rama : $RamaDeploy"
-	Branch=RamaDeploy;
-	git branch: "${Branch}", credentialsId:'Git-credential', url: 'https://github.com/juanRodriguezGarcia/cicd.git'
-	echo "Despues del cambio"
-	sh "git branch -a"
+	// def RamaDeploy = input (message: 'Selecciona,',
+	// parameter:[
+	// 	[$class:'ChoiseParameterDefinition',
+	// 	choices: ramasName.join('\n'),
+	// 	name: 'Selecciona rama',
+	// 	description: 'desc'
+	// 	]
+	// ])
+	// echo "Rama : $RamaDeploy"
+	// Branch=RamaDeploy;
+	// git branch: "${Branch}", credentialsId:'Git-credential', url: 'https://github.com/juanRodriguezGarcia/cicd.git'
+	// echo "Despues del cambio"
+	// sh "git branch -a"
 	
 	// //Lectura del jenkins de la rama seleccionada
 	// script{
