@@ -28,11 +28,11 @@ pipeline {
                 script {			
                     	//Generar tag
                     withCredentials([[$class: 'UsernamePasswordMultiBinding',credentialsId:'sonarid',usernameVariable:'sonar',
-                    passwordVariable:'GITHUB_ACESS_TOKEN']]){
+                    passwordVariable:'GITHUB_ACCESS_TOKEN']]){
                         gitTagPush(version:'version1',
                         message:'descripcion',
                         username: env.GITHUB_APP,
-                        password:env.GITHUB_ACESS_TOKEN,
+                        password:env.GITHUB_ACCESS_TOKEN,
                         email:"juang.rodriguez10@gmail.com")
                     }
                     echo "### Se termina ejecucion rama seleccionada #####"                 
