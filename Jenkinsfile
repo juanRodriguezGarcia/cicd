@@ -27,11 +27,20 @@ pipeline {
             steps {
                 script {			
                     	//Generar tag
+
+                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'sonarid',
+                        usernameVariable: 'sonar', passwordVariable: 'GITHUB_ACCESS_TOKEN']]) {
+
+                        echo "Usuario de GitHub: ${env.sonar}"
+                        echo "Longitud del token: ${env.GITHUB_ACCESS_TOKEN?.length() ?: 'No asignado'}"
+                        echo "Token del token: ${env.GITHUB_ACCESS_TOKEN}"
+                    }
+
                     withCredentials([[$class: 'UsernamePasswordMultiBinding',credentialsId:'sonarid',usernameVariable:'sonar',
                     passwordVariable:'GITHUB_ACCESS_TOKEN']]){
-                        gitTagPush(version:'version1',
-                        message:'descripcion',
-                        username: env.GITHUB_APP,
+                        gitTagPush(version:'1.0.0',
+                        message:'descripcion tag',
+                        username:env.sonar,
                         password:env.GITHUB_ACCESS_TOKEN,
                         email:"juang.rodriguez10@gmail.com")
                     }
