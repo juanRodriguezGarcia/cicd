@@ -43,21 +43,25 @@ pipeline {
 
 
                 def RamaDeploy = input(
-    message: 'Selecciona:',
-    parameters: [
-        [$class: 'ChoiceParameterDefinition',
-            choices: ramasName.join('\n'),
-            name: 'Selecciona rama',
-            description: 'desc'
-        ]
-    ]
-)
+                    message: 'Selecciona:',
+                    parameters: [
+                        [$class: 'ChoiceParameterDefinition',
+                            choices: ramasName.join('\n'),
+                            name: 'Selecciona rama',
+                            description: 'desc'
+                        ]
+                    ]
+                )
                     echo "Rama : $RamaDeploy"
-                    Branch=RamaDeploy;
+                    Branch=RamaDeploy.trim();
                     git branch: "${Branch}", credentialsId:'sonarid', url: 'https://github.com/juanRodriguezGarcia/cicd.git'
                     echo "Despues del cambio"
                     sh "git branch -a"
-                    
+                    echo "##### Lectura del jenkinsfile de la rama #######################"
+                    script{
+                        load 'Jenkinfiledev'
+                    }
+                    echo "### Se termina ejecucion rama seleccionada #####"                 
                 } //
             }
     }
