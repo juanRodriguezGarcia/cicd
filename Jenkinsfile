@@ -1,6 +1,6 @@
 inode('linux'){
 
-    
+
 enviroment{
 	AWS_REGION='us-east-1'
 	AWS_DEFAULT_REGION='us-east-1'
@@ -54,25 +54,25 @@ stage("Deploy rama"){
 	])
 	echo "Rama : $RamaDeploy"
 	Branch=RamaDeploy;
-	git branch: "${Branch}", credentialsId:'Git-credential', url: https://repogit.git
+	git branch: "${Branch}", credentialsId:'Git-credential', url: 'https://github.com/juanRodriguezGarcia/cicd.git'
 	echo "Despues del cambio"
 	sh "git branch -a"
 	
-	//Lectura del jenkins de la rama seleccionada
-	script{
-		load 'Jenkinsfile2'
-	}
+	// //Lectura del jenkins de la rama seleccionada
+	// script{
+	// 	load 'Jenkinsfile2'
+	// }
 	
 	
-	//Generar tag
-	withCredentials([[$class: 'UsernamePasswordMultiBinding',credentialsId:'git-hut-creden',usernameVariable:'GITHUB_APP',
-	passeowdVariable:'GITHUB_ACESS_TOKEN']]){
-		gitTagPush(version:'version1',
-		message:'descripcion',
-		username: env.GITHUB_APP,
-		password:env.GITHUB_ACESS_TOKEN,
-		email:"juang.rodriguez10@gmail.com")
-	}
+	// //Generar tag
+	// withCredentials([[$class: 'UsernamePasswordMultiBinding',credentialsId:'git-hut-creden',usernameVariable:'GITHUB_APP',
+	// passeowdVariable:'GITHUB_ACESS_TOKEN']]){
+	// 	gitTagPush(version:'version1',
+	// 	message:'descripcion',
+	// 	username: env.GITHUB_APP,
+	// 	password:env.GITHUB_ACESS_TOKEN,
+	// 	email:"juang.rodriguez10@gmail.com")
+	// }
 	
 	
 
