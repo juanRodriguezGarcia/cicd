@@ -44,7 +44,7 @@ pipeline {
 
                     def RamaDeploy = input (message: 'Selecciona,',
                     parameter:[
-                        [$class:'ChoiseParameterDefinition',
+                        [$class:'ChoiceParameterDefinition',
                         choices: ramasName.join('\n'),
                         name: 'Selecciona rama',
                         description: 'desc'
