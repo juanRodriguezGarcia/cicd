@@ -34,13 +34,29 @@ pipeline {
                     def contenido = sh(script: "cat ramas.txt",returnStdout:true).trim()
                     echo contenido;
                     def values = contenido.split('\n')
-                    ranasName=[]
+                    ramasName=[]
                     for (String exp:values){
                         if(!exp.contains("master") &&  !exp.contains("HEAD")){
                             ramasName.add(exp);
                         }
                     }
-                }
+
+
+                    def RamaDeploy = input (message: 'Selecciona,',
+                    parameter:[
+                        [$class:'ChoiseParameterDefinition',
+                        choices: ramasName.join('\n'),
+                        name: 'Selecciona rama',
+                        description: 'desc'
+                        ]
+                    ])
+                    echo "Rama : $RamaDeploy"
+                    Branch=RamaDeploy;
+                    git branch: "${Branch}", credentialsId:'sonarid', url: 'https://github.com/juanRodriguezGarcia/cicd.git'
+                    echo "Despues del cambio"
+                    sh "git branch -a"
+                    
+                } //
             }
     }
 
