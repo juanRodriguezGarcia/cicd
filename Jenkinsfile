@@ -23,31 +23,6 @@ pipeline {
             }
     }
 
-    stage("Generar tag"){
-            steps {
-                script {			
-                    	//Generar tag
-
-                    withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'sonarid',
-                        usernameVariable: 'sonar', passwordVariable: 'GITHUB_ACCESS_TOKEN']]) {
-
-                        echo "Usuario de GitHub: ${env.sonar}"
-                        echo "Longitud del token: ${env.GITHUB_ACCESS_TOKEN?.length() ?: 'No asignado'}"
-                        echo "Token del token: ${env.GITHUB_ACCESS_TOKEN}"
-                    }
-
-                    withCredentials([[$class: 'UsernamePasswordMultiBinding',credentialsId:'sonarid',usernameVariable:'sonar',
-                    passwordVariable:'GITHUB_ACCESS_TOKEN']]){
-                        gitTagPush(version:'1.0.0',
-                        message:'descripcion tag',
-                        username:env.sonar,
-                        password:env.GITHUB_ACCESS_TOKEN,
-                        email:"juang.rodriguez10@gmail.com")
-                    }
-                    echo "### Se termina ejecucion rama seleccionada #####"                 
-                } //
-            }
-    }
 
     stage("seleccionar rama"){
             steps {
@@ -85,10 +60,41 @@ pipeline {
                     script{
                         load 'Jenkinfiledev'
                     }
+                    
+                    echo "##### Vuelve a la rama indicada para generar el tag a partir de esa rama #################"
+                        withCredentials([usernamePassword(credentialsId: 'sonarid', usernameVariable: 'sonar',  passwordVariable: 'GITHUB_ACCESS_TOKEN')]) {
+                        script {
+                            echo "Usuario de GitHub: ${env.sonar}"
+                            echo "Longitud del token: ${env.GITHUB_ACCESS_TOKEN.length()}"
+                    
+                            // Checkout con Jenkins
+                            git branch: Branch, credentialsId: 'sonarid', url: 'https://github.com/juanRodriguezGarcia/cicd.git'
+                    
+                            echo "##Valor token###"
+                            sh 'echo "Token: $GITHUB_ACCESS_TOKEN"'
+                            
+                            sh '''
+                            git config --global user.email "juang.rodriguez10@gmail.com"
+                            git config --global user.name "$sonar"
+                            
+                            
+                            # Cambiar la URL remota para autenticarse con el token
+                            git remote set-url origin https://sonar:$GITHUB_ACCESS_TOKEN@github.com/juanRodriguezGarcia/cicd.git
+
+
+                            git tag -a 1.0.0 -m "Rama $branchName"
+                            git push origin --tags
+                            '''
+                        }
+                    }
+                    
                     echo "### Se termina ejecucion rama seleccionada #####"                 
                 } //
             }
     }
+    
+    
+
 
 
   }
@@ -107,3 +113,38 @@ pipeline {
       
   }
 } 
+
+
+    //     stage("Generar tag"){
+    //         steps {
+    //             script {			
+    //                 	//Generar tag
+
+    //                 withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'sonarid',
+    //                     usernameVariable: 'sonar', passwordVariable: 'GITHUB_ACCESS_TOKEN']]) {
+
+    //                     echo "Usuario de GitHub: ${env.sonar}"
+    //                     echo "Longitud del token: ${env.GITHUB_ACCESS_TOKEN?.length() ?: 'No asignado'}"
+    //                     echo "Token del token: ${env.GITHUB_ACCESS_TOKEN}"
+    //                 }
+
+    //                 withCredentials([usernamePassword(credentialsId: 'sonarid', 
+    //                                                   usernameVariable: 'sonar', 
+    //                                                   passwordVariable: 'GITHUB_ACCESS_TOKEN')]) {
+    //                     script {
+    //                         echo "Usuario de GitHub: ${env.sonar}"
+    //                         echo "Longitud del token: ${env.GITHUB_ACCESS_TOKEN.length()}"
+                    
+    //                         sh '''
+    //                         git config --global user.email "juang.rodriguez10@gmail.com"
+    //                         git config --global user.name "$sonar"
+    //                         git remote set-url origin https://$GITHUB_ACCESS_TOKEN@github.com/juanRodriguezGarcia/cicd.git
+    //                         git tag -a version1 -m "descripcion"
+    //                         git push origin --tags
+    //                         '''
+    //                     }
+    //                 }
+    //                 echo "### Se termina ejecucion rama seleccionada #####"                 
+    //             } //
+    //         }
+    // }
