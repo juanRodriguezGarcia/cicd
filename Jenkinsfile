@@ -8,6 +8,7 @@ pipeline {
   environment {
     AWS_REGION='us-east-1'
 	AWS_DEFAULT_REGION='us-east-1'
+	GH_TOKEN = credentials('gitsonar') // Usa el ID de la credencial de Jenkins
   }
   stages {
 
@@ -15,13 +16,57 @@ pipeline {
             steps {
                 script {			
                 sh "echo 'hola mundo desde GIT'"
+                echo "####################################### GH ####################################"
+                sh 'echo $PATH'
+                sh 'gh --version'
+                sh 'echo "Token: ${GH_TOKEN:0:4}********"'
                     echo "### antesd del cabmio de rama"
                     sh "pwd"
                     sh "ls -ltr"
                     sh "git branch -a"
+                    
                 }
             }
     }
+
+//     stage("paso crear rama desde tag y crear PR desde dicho tag a master o main"){
+//             steps {
+//                 script {			
+//                     echo "### Se va a generar una rama temporal a partir de un tag para mergerarlo a master y develop ################"
+// //                        //GITHUB_ACCESS_TOKEN  es una variable que retorna el comando withCredentials  que trea e token seguro configurado antes en jenkins
+// //                        withCredentials([usernamePassword(credentialsId: 'sonarid', usernameVariable: 'sonar', passwordVariable: 'GITHUB_ACCESS_TOKEN')]) {
+// //                            sh """
+// //                            git fetch --tags
+// //                            git checkout -b featu-1.0.0 1.0.0
+// //                            git remote set-url origin https://sonar:$GITHUB_ACCESS_TOKEN@github.com/juanRodriguezGarcia/cicd.git
+// //                            git push origin featu-1.0.0
+// //                            """
+// //                        }
+                        
+//                         withCredentials([
+//                             usernamePassword(credentialsId: 'sonarid', usernameVariable: 'sonar', passwordVariable: 'GITHUB_ACCESS_TOKEN'),
+//                             string(credentialsId: 'gitsonar', variable: 'GH_TOKEN')
+//                         ]) {
+//                             sh """
+//                             #git fetch --tags
+//                             #git checkout -b featur-1.0.1 1.0.1
+                            
+//                             # Configurar autenticación en GitHub CLI
+//                             #echo \$GH_TOKEN | gh auth login --with-token
+//                             # Crear un archivo de prueba para que la rama tenga cambios
+//                             #echo "Actualización desde Jenkins" > update.txt
+//                             #git add update.txt
+//                             #git commit -m "Agregando un cambio para PR desde Jenkins"
+//                             #git push origin featur-1.0.1
+                        
+//                             # Crear PR desde la nueva rama
+//                             #gh pr create --base main --head featu-1.0.0 --title "Feature desde el tag 1.0.0" --body "Este PR corrige XYZ"
+//                             gh pr create --base develop --head featu-1.0.0 --title "Feature desde el tag 1.0.0" --body "Este PR corrige XYZ"
+//                             """
+//                         }       
+//                 }//
+//             }
+//     }
 
 
     stage("seleccionar rama"){
@@ -53,7 +98,9 @@ pipeline {
                 )
                     echo "Rama : $RamaDeploy"
                     Branch=RamaDeploy.trim();
-                    git branch: "${Branch}", credentialsId:'sonarid', url: 'https://github.com/juanRodriguezGarcia/cicd.git'
+                    //git branch: "${Branch}", credentialsId:'sonarid', url: 'https://github.com/juanRodriguezGarcia/cicd.git'
+                    git branch: "${Branch}", credentialsId:'sonarid', url: 'https://github.com/juanRodriguezGarcia/fuentes.git'
+                    
                     echo "Despues del cambio"
                     sh "git branch -a"
                     echo "##### Lectura del jenkinsfile de la rama #######################"
@@ -69,6 +116,7 @@ pipeline {
                     
                             // Checkout con Jenkins
                             git branch: Branch, credentialsId: 'sonarid', url: 'https://github.com/juanRodriguezGarcia/cicd.git'
+                            git branch: Branch, credentialsId: 'sonarid', url: 'https://github.com/juanRodriguezGarcia/fuentes.git'
                     
                             echo "##Valor token###"
                             sh 'echo "Token: $GITHUB_ACCESS_TOKEN"'
@@ -79,48 +127,21 @@ pipeline {
                             
                             
                             # Cambiar la URL remota para autenticarse con el token
-                            git remote set-url origin https://sonar:$GITHUB_ACCESS_TOKEN@github.com/juanRodriguezGarcia/cicd.git
-
-
-                            git tag -a 1.0.0 -m "Rama $branchName"
+                            #git remote set-url origin https://sonar:$GITHUB_ACCESS_TOKEN@github.com/juanRodriguezGarcia/cicd.git
+                            git remote set-url origin https://sonar:$GITHUB_ACCESS_TOKEN@github.com/juanRodriguezGarcia/fuentes.git
+ 
+                            git tag -a 1.0.1 -m "Rama $branchName"
                             git push origin --tags
                             '''
                         }
                     }
                     
-                    echo "### Se termina ejecucion rama seleccionada #####" 
-
-                    //Desde un tag si es candidato a prod se debe hacer un PR a la rama develop y master.
-
-
-
+                    echo "### Se termina ejecucion rama seleccionada #####"                 
                 } //
             }
     }
     
     
-
-    stage("paso crear rama de tag"){
-            steps {
-                script {			
-                    echo "### Se va a generar una rama temporal a partir de un tag para mergerarlo a master y develop ################"
-                        //Sonar es el usuario creado en jenkins 
-                        withCredentials([usernamePassword(credentialsId: 'sonarid', usernameVariable: 'sonar', passwordVariable: 'GITHUB_ACCESS_TOKEN')]) {
-                            sh """
-                            git fetch --tags
-                            git checkout -b feature-1.0.0 1.0.0
-                            git remote set-url origin https://sonar:$GITHUB_ACCESS_TOKEN@github.com/juanRodriguezGarcia/cicd.git
-                            git push origin feature-1.0.0
-                            """
-                        }     
-                        
-                        
-                        
-                        
-                }//
-            }
-    }
-
 
 
 
@@ -142,7 +163,7 @@ pipeline {
 } 
 
 
-    //     stage("Generar tag"){
+    //     stage("Generar tag desde la misma rama sobre la que se esta trabajando"){
     //         steps {
     //             script {			
     //                 	//Generar tag
