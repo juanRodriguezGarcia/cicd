@@ -29,7 +29,99 @@ pipeline {
             }
     }
 
-//     stage("paso crear rama desde tag y crear PR desde dicho tag a master o main"){
+    //Desplega una rama remota y genera un tag de la rama remota indicada
+    stage("Desplegar rama remota"){
+            steps {
+                script {			
+                    sh "pwd"
+                    sh "ls -ltrh"
+                    def rama;
+                    echo "### ramas remotas"
+                    sh "rm -rf ramas.txt"
+                
+                    //git ls-remote --heads https://github.com/juanRodriguezGarcia/fuentes.git | cut -f2 | cut -d'/' -f3
+                    //sh "git ls-remote --heads https://github.com/juanRodriguezGarcia/fuentes.git | awk '{print $2}' | sed 's|refs/heads/||' > ramas.txt"
+                    sh "git ls-remote --heads https://github.com/juanRodriguezGarcia/fuentes.git | cut -f2 | cut -d'/' -f3 > rama.txt"                  
+                    sh "cat rama.txt"
+                    ///Listar ramas
+                    def contenido = sh(script: "cat rama.txt",returnStdout:true).trim()
+                    echo contenido;
+                    def values = contenido.split('\n')
+                    ramasName=[]
+                    for (String exp:values){
+                        if(!exp.contains("master") &&  !exp.contains("HEAD")){
+                            ramasName.add(exp);
+                        }
+                    }
+                    def RamaDeploy = input(
+                        message: 'Selecciona:',
+                        parameters: [
+                            [$class: 'ChoiceParameterDefinition',
+                                choices: ramasName.join('\n'),
+                                name: 'Selecciona rama',
+                                description: 'desc'
+                            ]
+                        ]
+                    )
+                    echo "Rama : $RamaDeploy"
+                    Branch=RamaDeploy.trim();
+                    //La credencial sonarid se configura en credential de jenkins tipo Username with password para los Pull request se usa tipo Secret Text
+                    //git branch: "${Branch}", credentialsId:'sonarid', url: 'https://github.com/juanRodriguezGarcia/cicd.git'
+                    git branch: "${Branch}", credentialsId:'sonarid', url: 'https://github.com/juanRodriguezGarcia/fuentes.git'
+                    echo "Despues del cambio de repositorio remoto"
+                    sh "git branch -a"
+                    echo "##### Lectura del jenkinsfile de la rama (*-*) $Branch #######################"
+                    script{
+                        load 'Jenkinfiledev'
+                    }
+                    //usernameVariable: 'sonar'  sonar es el valor configurado en la llave sonarid esto retorna un token en la variable global de jenkins GITHUB_ACCESS_TOKEN
+                    echo "##### Vuelve a la rama indicada para generar el tag a partir de esa rama #################"
+                        withCredentials([usernamePassword(credentialsId: 'sonarid', usernameVariable: 'sonar',  passwordVariable: 'GITHUB_ACCESS_TOKEN')]) {
+                        script {
+                            echo "Usuario de GitHub: ${env.sonar}"
+                            echo "Longitud del token: ${env.GITHUB_ACCESS_TOKEN.length()}"                   
+                            // Checkout con Jenkins
+                            //git branch: Branch, credentialsId: 'sonarid', url: 'https://github.com/juanRodriguezGarcia/cicd.git'
+                            git branch: Branch, credentialsId: 'sonarid', url: 'https://github.com/juanRodriguezGarcia/fuentes.git'
+                            sh "ls -ltr"
+                            echo "##Valor token###"
+                            sh 'echo "Token: $GITHUB_ACCESS_TOKEN"'
+                            
+                            sh '''
+                            git config --global user.email "juang.rodriguez10@gmail.com"
+                            git config --global user.name "$sonar"
+                               
+                            # Cambiar la URL remota para autenticarse con el token
+                            git remote set-url origin https://sonar:$GITHUB_ACCESS_TOKEN@github.com/juanRodriguezGarcia/fuentes.git
+                            git tag
+                            git tag -l | xargs git tag -d  # Borra todos los tags locales
+                            #git ls-remote --tags origin | awk '{print ":" $2}' | xargs git push origin
+                            git tag
+                            #git tag -d 1.0.0 //borra un tag en especifico
+                            pwd
+                            ls -ltrh
+                            git remote -v
+                            git branch
+                            git tag -a 1.0.9 -m "Rama $Branch version 9"
+                            git push origin --tags
+                            git tag
+                            '''
+                        }
+                    }
+                    
+                    echo "### Se termina ejecucion rama seleccionada #####"                 
+                } //
+            }
+    }
+
+
+
+
+
+
+
+
+//     stage("paso crear rama desde TAG y crear PR para mergear a main o master desde dicha rama nuevan"){
 //             steps {
 //                 script {			
 //                     echo "### Se va a generar una rama temporal a partir de un tag para mergerarlo a master y develop ################"
@@ -68,78 +160,75 @@ pipeline {
 //             }
 //     }
 
-
-    stage("seleccionar rama"){
-            steps {
-                script {			
-                    def rama;
-                    sh "git branch -a > ramas.txt"
-                    sh "sed 's/remotes\\/origin\\///' ramas.txt > rama.txt"
-                    sh "cat rama.txt"
-                    ///Listar ramas
-                    def contenido = sh(script: "cat rama.txt",returnStdout:true).trim()
-                    echo contenido;
-                    def values = contenido.split('\n')
-                    ramasName=[]
-                    for (String exp:values){
-                        if(!exp.contains("master") &&  !exp.contains("HEAD")){
-                            ramasName.add(exp);
-                        }
-                    }
-                def RamaDeploy = input(
-                    message: 'Selecciona:',
-                    parameters: [
-                        [$class: 'ChoiceParameterDefinition',
-                            choices: ramasName.join('\n'),
-                            name: 'Selecciona rama',
-                            description: 'desc'
-                        ]
-                    ]
-                )
-                    echo "Rama : $RamaDeploy"
-                    Branch=RamaDeploy.trim();
-                    //git branch: "${Branch}", credentialsId:'sonarid', url: 'https://github.com/juanRodriguezGarcia/cicd.git'
-                    git branch: "${Branch}", credentialsId:'sonarid', url: 'https://github.com/juanRodriguezGarcia/fuentes.git'
+    //desplegar una rama del mismo repo y generar tag de una rama del mismo repo
+    // stage("seleccionar rama"){
+    //         steps {
+    //             script {			
+    //                 def rama;
+    //                 sh "git branch -a > ramas.txt"
+    //                 sh "sed 's/remotes\\/origin\\///' ramas.txt > rama.txt"
+    //                 sh "cat rama.txt"
+    //                 ///Listar ramas
+    //                 def contenido = sh(script: "cat rama.txt",returnStdout:true).trim()
+    //                 echo contenido;
+    //                 def values = contenido.split('\n')
+    //                 ramasName=[]
+    //                 for (String exp:values){
+    //                     if(!exp.contains("master") &&  !exp.contains("HEAD")){
+    //                         ramasName.add(exp);
+    //                     }
+    //                 }
+    //             def RamaDeploy = input(
+    //                 message: 'Selecciona:',
+    //                 parameters: [
+    //                     [$class: 'ChoiceParameterDefinition',
+    //                         choices: ramasName.join('\n'),
+    //                         name: 'Selecciona rama',
+    //                         description: 'desc'
+    //                     ]
+    //                 ]
+    //             )
+    //                 echo "Rama : $RamaDeploy"
+    //                 Branch=RamaDeploy.trim();
+    //                 git branch: "${Branch}", credentialsId:'sonarid', url: 'https://github.com/juanRodriguezGarcia/cicd.git'
+  
                     
-                    echo "Despues del cambio"
-                    sh "git branch -a"
-                    echo "##### Lectura del jenkinsfile de la rama #######################"
-                    script{
-                        load 'Jenkinfiledev'
-                    }
+    //                 echo "Despues del cambio"
+    //                 sh "git branch -a"
+    //                 echo "##### Lectura del jenkinsfile de la rama #######################"
+    //                 script{
+    //                     load 'Jenkinfiledev'
+    //                 }
                     
-                    echo "##### Vuelve a la rama indicada para generar el tag a partir de esa rama #################"
-                        withCredentials([usernamePassword(credentialsId: 'sonarid', usernameVariable: 'sonar',  passwordVariable: 'GITHUB_ACCESS_TOKEN')]) {
-                        script {
-                            echo "Usuario de GitHub: ${env.sonar}"
-                            echo "Longitud del token: ${env.GITHUB_ACCESS_TOKEN.length()}"
+    //                 echo "##### Vuelve a la rama indicada para generar el tag a partir de esa rama #################"
+    //                     withCredentials([usernamePassword(credentialsId: 'sonarid', usernameVariable: 'sonar',  passwordVariable: 'GITHUB_ACCESS_TOKEN')]) {
+    //                     script {
+    //                         echo "Usuario de GitHub: ${env.sonar}"
+    //                         echo "Longitud del token: ${env.GITHUB_ACCESS_TOKEN.length()}"
                     
-                            // Checkout con Jenkins
-                            git branch: Branch, credentialsId: 'sonarid', url: 'https://github.com/juanRodriguezGarcia/cicd.git'
-                            git branch: Branch, credentialsId: 'sonarid', url: 'https://github.com/juanRodriguezGarcia/fuentes.git'
+    //                         // Checkout con Jenkins
+    //                         git branch: Branch, credentialsId: 'sonarid', url: 'https://github.com/juanRodriguezGarcia/cicd.git'
                     
-                            echo "##Valor token###"
-                            sh 'echo "Token: $GITHUB_ACCESS_TOKEN"'
+    //                         echo "##Valor token###"
+    //                         sh 'echo "Token: $GITHUB_ACCESS_TOKEN"'
                             
-                            sh '''
-                            git config --global user.email "juang.rodriguez10@gmail.com"
-                            git config --global user.name "$sonar"
+    //                         sh '''
+    //                         git config --global user.email "juang.rodriguez10@gmail.com"
+    //                         git config --global user.name "$sonar"
                             
-                            
-                            # Cambiar la URL remota para autenticarse con el token
-                            #git remote set-url origin https://sonar:$GITHUB_ACCESS_TOKEN@github.com/juanRodriguezGarcia/cicd.git
-                            git remote set-url origin https://sonar:$GITHUB_ACCESS_TOKEN@github.com/juanRodriguezGarcia/fuentes.git
+    //                         # Cambiar la URL remota para autenticarse con el token
+    //                         git remote set-url origin https://sonar:$GITHUB_ACCESS_TOKEN@github.com/juanRodriguezGarcia/cicd.git
  
-                            git tag -a 1.0.1 -m "Rama $branchName"
-                            git push origin --tags
-                            '''
-                        }
-                    }
+    //                         git tag -a 1.0.1 -m "Rama $branchName"
+    //                         git push origin --tags
+    //                         '''
+    //                     }
+    //                 }
                     
-                    echo "### Se termina ejecucion rama seleccionada #####"                 
-                } //
-            }
-    }
+    //                 echo "### Se termina ejecucion rama seleccionada #####"                 
+    //             } //
+    //         }
+    // }
     
     
 
