@@ -88,12 +88,39 @@ pipeline {
                         }
                     }
                     
-                    echo "### Se termina ejecucion rama seleccionada #####"                 
+                    echo "### Se termina ejecucion rama seleccionada #####" 
+
+                    //Desde un tag si es candidato a prod se debe hacer un PR a la rama develop y master.
+
+
+
                 } //
             }
     }
     
     
+
+    stage("paso crear rama de tag"){
+            steps {
+                script {			
+                    echo "### Se va a generar una rama temporal a partir de un tag para mergerarlo a master y develop ################"
+                        //Sonar es el usuario creado en jenkins 
+                        withCredentials([usernamePassword(credentialsId: 'sonarid', usernameVariable: 'sonar', passwordVariable: 'GITHUB_ACCESS_TOKEN')]) {
+                            sh """
+                            git fetch --tags
+                            git checkout -b feature-1.0.0 1.0.0
+                            git remote set-url origin https://sonar:$GITHUB_ACCESS_TOKEN@github.com/juanRodriguezGarcia/cicd.git
+                            git push origin feature-1.0.0
+                            """
+                        }     
+                        
+                        
+                        
+                        
+                }//
+            }
+    }
+
 
 
 
