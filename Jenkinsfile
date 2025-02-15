@@ -13,6 +13,7 @@ pipeline {
     AWS_REGION='us-east-1'
 	AWS_DEFAULT_REGION='us-east-1'
 	GH_TOKEN = credentials('gitsonar') // Usa el ID de la credencial de Jenkins
+     PAYLOAD = '' 
   }
   stages {
 
@@ -22,32 +23,34 @@ pipeline {
                     echo "####################################### VALIDANDO RAMAS ####################################"
                     try{
                         echo "####################################### (*_*) $BRANCH (*_*) ####################################"  
+                         def payload = params.PAYLOAD ?: '{}'
+                         echo "Payload recibido: ${payload}"
                     }catch(Exception ex){
                         echo "#####################################  No existen parametros ####"
                     }                  
                 }
             }
     }
-        // //Esto es cuando se envia todo el payload
-        stage('Filtrar Merge') {
-            steps {
-                script {
-                    def json = readJSON text: params.payload
-                    def ref = json.ref  // Rama en la que ocurrió el push, ej: "refs/heads/main"
-                    def pusher = json.pusher.name  // Nombre del usuario que hizo el push
-                    def compare_url = json.compare  // Solo aparece en merges
+        // // //Esto es cuando se envia todo el payload
+        // stage('Filtrar Merge') {
+        //     steps {
+        //         script {
+        //             def json = readJSON text: params.payload
+        //             def ref = json.ref  // Rama en la que ocurrió el push, ej: "refs/heads/main"
+        //             def pusher = json.pusher.name  // Nombre del usuario que hizo el push
+        //             def compare_url = json.compare  // Solo aparece en merges
 
-                    // Verifica si el push fue en la rama "main" y si tiene URL de comparación (indica merge)
-                    if (ref == 'refs/heads/main' && compare_url) {
-                        echo "✅ Se hizo merge a la rama ${ref} por ${pusher}. Ejecutando pipeline..."
-                    } else {
-                        echo "❌ No es un merge a main. Pipeline detenido."
-                        currentBuild.result = 'ABORTED'
-                        error("El build no continuará.")
-                    }
-                }
-            }
-        }
+        //             // Verifica si el push fue en la rama "main" y si tiene URL de comparación (indica merge)
+        //             if (ref == 'refs/heads/main' && compare_url) {
+        //                 echo "✅ Se hizo merge a la rama ${ref} por ${pusher}. Ejecutando pipeline..."
+        //             } else {
+        //                 echo "❌ No es un merge a main. Pipeline detenido."
+        //                 currentBuild.result = 'ABORTED'
+        //                 error("El build no continuará.")
+        //             }
+        //         }
+        //     }
+        // }
 
     stage("paso 1"){
             steps {
