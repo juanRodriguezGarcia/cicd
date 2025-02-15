@@ -28,7 +28,21 @@ pipeline {
                     //def payload = sh(script: 'curl -u "juan:118afbb39ac78d141d8c45744387d2a9e9" -s $BUILD_URL/api/json', returnStdout: true).trim()
                     //def payload = sh(script: 'curl -u "juan:118afbb39ac78d141d8c45744387d2a9e9" -s http://98.82.164.209:8080/job/dev/job/RemoteConParametros/${env.BUILD_NUMBER}/api/json', returnStdout: true).trim()
                     def payload = sh(script: 'curl -u "juan:118afbb39ac78d141d8c45744387d2a9e9" -s $VALOR1/job/dev/job/RemoteConParametros/${BUILD_NUMBER}/api/json', returnStdout: true).trim()
+                    echo "Payload recibido: ${payload}"
+                    }catch(Exception ex){
+                        echo "#####################################  No existen parametros ####"
+                    }                  
+                }
+            }
+    }
 
+
+        stage("paso 0 validar si vienen payload en la ejecucion"){
+            steps {
+                script {			
+                    echo "####################################### VALIDANDO PAYLOAD SIN PARAMETROS ####################################"
+                    try{
+                    def payload = sh(script: 'curl -u "juan:118afbb39ac78d141d8c45744387d2a9e9" -s $VALOR1/job/dev/job/RemoteConParametros/${BUILD_NUMBER}/api/json', returnStdout: true).trim()
                     echo "Payload recibido: ${payload}"
                     }catch(Exception ex){
                         echo "#####################################  No existen parametros ####"
