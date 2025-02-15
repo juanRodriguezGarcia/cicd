@@ -29,7 +29,10 @@ pipeline {
             steps {
                 script {
                     try{
-                        echo "####################################### (*_*) $env.GIT_PUSH_PAYLOAD; (*_*) ####################################"  
+                        // Leer la solicitud HTTP entrante (solo funciona si Jenkins la captura)
+                        def payload = new String(request.inputStream.bytes, 'UTF-8')
+                        echo "Received Payload: ${payload}"
+                        //echo "####################################### (*_*) $env.GIT_PUSH_PAYLOAD; (*_*) ####################################"  
                     }catch(Exception ex){
                         echo "#####################################  No existen payload ####"
                     } 
