@@ -25,13 +25,11 @@ pipeline {
             }
     }
         //Esto es cuando se envia todo el payload
-        stage('Extract Branch') {
+        stage('Extract Branch from Payload') {
             steps {
                 script {
                     try{
-                        // Leer la solicitud HTTP entrante (solo funciona si Jenkins la captura)
-                        def PAYLOAD = sh(script: 'cat', returnStdout: true).trim()
-                        echo "Received Payload: ${PAYLOAD}"
+                        echo "Evento de GitHub: ${env.X_GITHUB_EVENT}"
                         //echo "####################################### (*_*) $env.GIT_PUSH_PAYLOAD; (*_*) ####################################"  
                     }catch(Exception ex){
                         echo "#####################################  No existen payload ####"
