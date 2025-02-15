@@ -8,7 +8,7 @@ pipeline {
       parameters {
         string(name: 'payload', defaultValue: '', description: 'GitHub Webhook Payload')
     }
-    
+
   environment {
     AWS_REGION='us-east-1'
 	AWS_DEFAULT_REGION='us-east-1'
@@ -47,6 +47,7 @@ pipeline {
                     }
                 }
             }
+        }
 
     stage("paso 1"){
             steps {
