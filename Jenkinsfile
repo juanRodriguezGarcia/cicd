@@ -5,6 +5,10 @@ def jsonParse(def json) {
 }
 pipeline {
   agent any 
+      parameters {
+        string(name: 'payload', defaultValue: '', description: 'GitHub Webhook Payload')
+    }
+    
   environment {
     AWS_REGION='us-east-1'
 	AWS_DEFAULT_REGION='us-east-1'
@@ -25,18 +29,24 @@ pipeline {
             }
     }
         // //Esto es cuando se envia todo el payload
-        // stage('Extract Branch from Payload') {
-        //     steps {
-        //         script {
-        //             try{
-        //                 echo "Evento de GitHub: ${env.X_GITHUB_EVENT}"
-        //                 //echo "####################################### (*_*) $env.GIT_PUSH_PAYLOAD; (*_*) ####################################"  
-        //             }catch(Exception ex){
-        //                 echo "#####################################  No existen payload ####"
-        //             } 
-        //         }
-        //     }
-        // }
+        stage('Filtrar Merge') {
+            steps {
+                script {
+                    def json = readJSON text: params.payload
+                    def ref = json.ref  // Rama en la que ocurrió el push, ej: "refs/heads/main"
+                    def pusher = json.pusher.name  // Nombre del usuario que hizo el push
+                    def compare_url = json.compare  // Solo aparece en merges
+
+                    // Verifica si el push fue en la rama "main" y si tiene URL de comparación (indica merge)
+                    if (ref == 'refs/heads/main' && compare_url) {
+                        echo "✅ Se hizo merge a la rama ${ref} por ${pusher}. Ejecutando pipeline..."
+                    } else {
+                        echo "❌ No es un merge a main. Pipeline detenido."
+                        currentBuild.result = 'ABORTED'
+                        error("El build no continuará.")
+                    }
+                }
+            }
 
     stage("paso 1"){
             steps {
