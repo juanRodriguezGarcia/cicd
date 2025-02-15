@@ -24,22 +24,19 @@ pipeline {
                 }
             }
     }
-        //Esto es cuando se envia todo el payload
-        stage('Extract Branch from Payload') {
-            steps {
-                script {
-                    try{
-                        echo "Evento de GitHub: ${env.X_GITHUB_EVENT}"
-                        //echo "####################################### (*_*) $env.GIT_PUSH_PAYLOAD; (*_*) ####################################"  
-                    }catch(Exception ex){
-                        echo "#####################################  No existen payload ####"
-                    } 
-
-                    
-
-                }
-            }
-        }
+        // //Esto es cuando se envia todo el payload
+        // stage('Extract Branch from Payload') {
+        //     steps {
+        //         script {
+        //             try{
+        //                 echo "Evento de GitHub: ${env.X_GITHUB_EVENT}"
+        //                 //echo "####################################### (*_*) $env.GIT_PUSH_PAYLOAD; (*_*) ####################################"  
+        //             }catch(Exception ex){
+        //                 echo "#####################################  No existen payload ####"
+        //             } 
+        //         }
+        //     }
+        // }
 
     stage("paso 1"){
             steps {
