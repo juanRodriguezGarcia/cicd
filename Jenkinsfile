@@ -24,6 +24,17 @@ pipeline {
                 }
             }
     }
+        //Esto es cuando se envia todo el payload
+        stage('Extract Branch') {
+            steps {
+                script {
+                    def payload = readJSON text: env.GIT_PUSH_PAYLOAD
+                    def branchName = payload.ref.replace('refs/heads/', '')
+                    env.BRANCH = branchName
+                    echo "Branch detected: ${env.BRANCH}"
+                }
+            }
+        }
 
     stage("paso 1"){
             steps {
