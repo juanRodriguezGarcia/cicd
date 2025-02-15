@@ -28,15 +28,13 @@ pipeline {
         stage('Extract Branch') {
             steps {
                 script {
+                    try{
+                        echo "####################################### (*_*) $env.GIT_PUSH_PAYLOAD; (*_*) ####################################"  
+                    }catch(Exception ex){
+                        echo "#####################################  No existen payload ####"
+                    } 
 
-// Parsear el JSON
-                    def json = new JsonSlurperClassic().parseText(env.GIT_PUSH_PAYLOAD)
-                    def branchName = json.ref.replace('refs/heads/', '')
-
-                    // Guardar la rama en una variable de entorno
-                    env.BRANCH = branchName
-
-                    echo "Branch detected: ${env.BRANCH}"
+                    
 
                 }
             }
