@@ -12,6 +12,19 @@ pipeline {
   }
   stages {
 
+    stage("paso 0 validar si vienen parametros en la ejecucion"){
+            steps {
+                script {			
+                    echo "####################################### VALIDANDO RAMAS ####################################"
+                    try{
+                        echo "####################################### (*_*) $BRANCH (*_*) ####################################"  
+                    }catch(Exception ex){
+                        echo "#####################################  No existen parametros ####"
+                    }                  
+                }
+            }
+    }
+
     stage("paso 1"){
             steps {
                 script {			
