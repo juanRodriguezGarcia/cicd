@@ -23,8 +23,9 @@ pipeline {
                     echo "####################################### VALIDANDO RAMAS ####################################"
                     try{
                         echo "####################################### (*_*) $BRANCH (*_*) ####################################"  
-                         def payload = params.PAYLOAD ?: '{}'
-                         echo "Payload recibido: ${payload}"
+                    // Ejecuta un comando para obtener el payload JSON del Webhook
+                    def payload = sh(script: 'curl -s $BUILD_URL/api/json', returnStdout: true).trim()
+                    echo "Payload recibido: ${payload}"
                     }catch(Exception ex){
                         echo "#####################################  No existen parametros ####"
                     }                  
