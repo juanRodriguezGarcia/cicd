@@ -28,10 +28,16 @@ pipeline {
         stage('Extract Branch') {
             steps {
                 script {
-                    def payload = readJSON text: env.GIT_PUSH_PAYLOAD
-                    def branchName = payload.ref.replace('refs/heads/', '')
+
+// Parsear el JSON
+                    def json = new JsonSlurperClassic().parseText(env.GIT_PUSH_PAYLOAD)
+                    def branchName = json.ref.replace('refs/heads/', '')
+
+                    // Guardar la rama en una variable de entorno
                     env.BRANCH = branchName
+
                     echo "Branch detected: ${env.BRANCH}"
+
                 }
             }
         }
