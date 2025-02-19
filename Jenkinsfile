@@ -6,7 +6,8 @@ def jsonParse(def json) {
 pipeline {
   agent any 
       parameters {
-        string(name: 'payload', defaultValue: '', description: 'GitHub Webhook Payload')
+        string(name: 'payload', defaultValue: '', description: 'Algun otro dato que se envie')
+	string(name: 'BRANCH', defaultValue: '', description: 'Rama enviada por git')
     }
 
   environment {
